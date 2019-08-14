@@ -1,5 +1,5 @@
 pub trait Primitive {
-    fn draw(&mut self, t: f32) -> (f32, f32);
+    fn draw(&mut self, t: f32, fs: f32) -> (f32, f32);
 }
 
 pub struct Point {
@@ -45,7 +45,7 @@ impl Rect {
 }
 
 impl Primitive for Rect {
-    fn draw(&mut self, t: f32) -> (f32, f32) {
+    fn draw(&mut self, t: f32, _fs: f32) -> (f32, f32) {
 
         let p = t * 4.0;
 
@@ -91,7 +91,7 @@ impl Line {
 }
 
 impl Primitive for Line {
-    fn draw(&mut self, t: f32) -> (f32, f32) {
+    fn draw(&mut self, t: f32, _fs: f32) -> (f32, f32) {
         let (point_x, point_y) = (
             self.begin.x + (self.end.x - self.begin.x) * t,
             self.begin.y + (self.end.y - self.begin.y) * t,

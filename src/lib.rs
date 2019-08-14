@@ -19,53 +19,29 @@ use std::f32;
 mod primitive;
 use primitive::{Primitive, Point, Line};
 
-struct Ctx {
-    current_primitive: usize,
-    switch_time: f32,
-    phase: f32,
-    test_line: [primitive::Line; 3],
+mod intro;
+
+struct Ctx<'a> {
+    current_scene: Option<&'a mut Primitive>,
+    intro: intro::Intro,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-
-    ctx.test_line[0].rotate += 0.0001;
-    ctx.test_line[2].rotate += 0.00001;
-    ctx.test_line[1].rotate += 0.00006;
-
-    ctx.phase += 1.0/fs * (220.0 + 55.0 * ctx.current_primitive as f32);
-
-    let phase = ctx.phase % 1.0;
-
-    let (x, y) = ctx.test_line[ctx.current_primitive]
-        .draw(
-            (phase * 3.1415926).sin()
-        );
-
-    if t - ctx.switch_time > 0.02 && phase < 0.01 {
-        ctx.phase = 0.0;
-        // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
-
-        ctx.switch_time = t;
-
-        ctx.current_primitive += 1;
-        if ctx.current_primitive > 2 {
-            ctx.current_primitive = 0;
-        }
-    }
-
-    return (x, y);
+    ctx.intro.draw(t, fs)
 }
 
-static mut CTX: Ctx = Ctx { 
-    current_primitive: 0,
-    switch_time: 0.0,
-    phase: 0.0,
-    test_line: [
-        Line::new(Point{x:0.0, y:0.0}, Point{x:0.2, y:0.2}),
-        Line::new(Point{x:0.0, y:0.0}, Point{x:0.4, y:0.0}),
-        Line::new(Point{x:0.0, y:0.0}, Point{x:0.1, y:0.0}),
-    ],
-
+static mut CTX: Ctx = Ctx {
+    intro: intro::Intro {
+        current_primitive: 0,
+        switch_time: 0.0,
+        phase: 0.0,
+        test_line: [
+            Line::new(Point{x:0.0, y:0.0}, Point{x:0.2, y:0.2}),
+            Line::new(Point{x:0.0, y:0.0}, Point{x:0.4, y:0.0}),
+            Line::new(Point{x:0.0, y:0.0}, Point{x:0.1, y:0.0}),
+        ],
+    },
+    current_scene: None
 };
 
 static mut BUFFER: [f32;8192] = [0.0;8192];
