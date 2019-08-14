@@ -22,16 +22,19 @@ use primitive::{Primitive, Point, Line};
 struct Ctx {
     current_primitive: usize,
     switch_time: f32,
+    phase: f32,
     test_line: [primitive::Line; 3],
 }
 
-fn process_sample(ctx: &mut Ctx, t: f32, _fs: f32) -> (f32, f32) {
+fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
 
     ctx.test_line[0].rotate += 0.0001;
     ctx.test_line[2].rotate += 0.00001;
     ctx.test_line[1].rotate += 0.00006;
 
-    let phase = (t * (220.0/*+ 55.0 * ctx.current_primitive as f32*/)) % 1.0;
+    ctx.phase += 1.0/fs * 220.0;
+
+    let phase = ctx.phase % 1.0;
 
     let (x, y) = ctx.test_line[ctx.current_primitive]
         .draw(
@@ -55,6 +58,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, _fs: f32) -> (f32, f32) {
 static mut CTX: Ctx = Ctx { 
     current_primitive: 0,
     switch_time: 0.0,
+    phase: 0.0,
     test_line: [
         Line::new(Point{x:0.0, y:0.0}, Point{x:0.2, y:0.2}),
         Line::new(Point{x:0.0, y:0.0}, Point{x:0.4, y:0.0}),
