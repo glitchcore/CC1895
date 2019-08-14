@@ -17,7 +17,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use std::f32;
 
 mod primitive;
-use primitive::{Primitive, Point, Line};
+use primitive::{Primitive, Point, Line, Ellipse};
 
 mod intro;
 
@@ -40,6 +40,7 @@ static mut CTX: Ctx = Ctx {
             Line::new(Point{x:0.0, y:0.0}, Point{x:0.4, y:0.0}),
             Line::new(Point{x:0.0, y:0.0}, Point{x:0.1, y:0.0}),
         ],
+        ellipse: Ellipse::new(0.5, 0.3),
     },
     current_scene: None
 };

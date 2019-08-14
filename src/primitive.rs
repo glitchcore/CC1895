@@ -1,5 +1,7 @@
+use std::f32;
+
 pub trait Primitive {
-    fn draw(&mut self, t: f32, fs: f32) -> (f32, f32);
+    fn draw(&self, t: f32, fs: f32) -> (f32, f32);
 }
 
 pub struct Point {
@@ -45,7 +47,7 @@ impl Rect {
 }
 
 impl Primitive for Rect {
-    fn draw(&mut self, t: f32, _fs: f32) -> (f32, f32) {
+    fn draw(&self, t: f32, _fs: f32) -> (f32, f32) {
 
         let p = t * 4.0;
 
@@ -91,7 +93,7 @@ impl Line {
 }
 
 impl Primitive for Line {
-    fn draw(&mut self, t: f32, _fs: f32) -> (f32, f32) {
+    fn draw(&self, t: f32, _fs: f32) -> (f32, f32) {
         let (point_x, point_y) = (
             self.begin.x + (self.end.x - self.begin.x) * t,
             self.begin.y + (self.end.y - self.begin.y) * t,
@@ -102,5 +104,35 @@ impl Primitive for Line {
         let (point_x, point_y) = shift((point_x, point_y), self.shift);
 
         return (point_x, point_y);
+    }
+}
+
+pub struct Ellipse {
+    a: f32,
+    b: f32,
+
+    rotate: f32,
+    shift: (f32, f32),
+    scale: (f32, f32)
+}
+
+impl Ellipse {
+    pub const fn new(a: f32, b: f32) -> Self {
+        Ellipse {
+            a,
+            b,
+            rotate: 0.0,
+            shift: (0.0, 0.0),
+            scale: (1.0, 1.0),
+        }
+    }
+}
+
+impl Primitive for Ellipse {
+    fn draw(&self, t: f32, _fs: f32) -> (f32, f32) {
+        (
+            self.a * (t * 2.0 * f32::consts::PI).sin(),
+            self.b * (t * 2.0 * f32::consts::PI).cos()
+        )
     }
 }
