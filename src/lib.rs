@@ -32,7 +32,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
     ctx.test_line[2].rotate += 0.00001;
     ctx.test_line[1].rotate += 0.00006;
 
-    ctx.phase += 1.0/fs * 220.0;
+    ctx.phase += 1.0/fs * (220.0 + 55.0 * ctx.current_primitive as f32);
 
     let phase = ctx.phase % 1.0;
 
@@ -41,7 +41,8 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
             (phase * 3.1415926).sin()
         );
 
-    if t - ctx.switch_time > t % 0.001 && phase < 0.01 {
+    if t - ctx.switch_time > 0.02 && phase < 0.01 {
+        ctx.phase = 0.0;
         // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
 
         ctx.switch_time = t;
