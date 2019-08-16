@@ -111,18 +111,23 @@ pub struct Ellipse {
     a: f32,
     b: f32,
 
-    rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub begin: f32,
+    pub end: f32,
+
+    pub rotate: f32,
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 impl Ellipse {
-    pub const fn new(a: f32, b: f32) -> Self {
+    pub const fn new(c: Point, a: f32, b: f32) -> Self {
         Ellipse {
             a,
             b,
+            begin: 0.0,
+            end: 1.0,
             rotate: 0.0,
-            shift: (0.0, 0.0),
+            shift: (c.x, c.y),
             scale: (1.0, 1.0),
         }
     }
@@ -130,9 +135,17 @@ impl Ellipse {
 
 impl Primitive for Ellipse {
     fn draw(&self, t: f32, _fs: f32) -> (f32, f32) {
-        (
-            self.a * (t * 2.0 * f32::consts::PI).sin(),
-            self.b * (t * 2.0 * f32::consts::PI).cos()
-        )
+        let p = self.begin + (self.end - self.begin) * t;
+
+        let (point_x, point_y) = (
+            self.a * (p * 2.0 * f32::consts::PI).sin(),
+            self.b * (p * 2.0 * f32::consts::PI).cos()
+        );
+
+        let (point_x, point_y) = scale((point_x, point_y), self.scale);
+        let (point_x, point_y) = rotate((point_x, point_y), self.rotate);
+        let (point_x, point_y) = shift((point_x, point_y), self.shift);
+
+        return (point_x, point_y);
     }
 }

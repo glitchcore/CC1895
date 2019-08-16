@@ -17,7 +17,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use std::f32;
 
 mod primitive;
-use primitive::{Primitive, Point, Line, Ellipse};
+use primitive::{Primitive};
 
 mod intro;
 
@@ -31,17 +31,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
 }
 
 static mut CTX: Ctx = Ctx {
-    intro: intro::Intro {
-        current_primitive: 0,
-        switch_time: 0.0,
-        phase: 0.0,
-        test_line: [
-            Line::new(Point{x:0.0, y:0.0}, Point{x:0.2, y:0.2}),
-            Line::new(Point{x:0.0, y:0.0}, Point{x:0.4, y:0.0}),
-            Line::new(Point{x:0.0, y:0.0}, Point{x:0.1, y:0.0}),
-        ],
-        ellipse: Ellipse::new(0.5, 0.3),
-    },
+    intro: intro::Intro::new(),
     current_scene: None
 };
 
@@ -68,7 +58,7 @@ pub fn request_frame(init_t: f32, fs: f32) -> f32 {
     let buffer_len = get_buffer_len();
     for i in 0..buffer_len/2 {
         unsafe {
-            let (x, y) = process_sample(&mut CTX, t, fs);
+            let (x, y) = process_sample(&mut CTX, t/1.0, fs*1.0);
 
             BUFFER[i] = x;
             BUFFER[i + buffer_len/2] = y;
