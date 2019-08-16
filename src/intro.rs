@@ -43,7 +43,9 @@ impl Intro {
     }
 
     pub fn draw(&mut self, t: f32, fs: f32) -> (f32, f32) {
-        self.phase += 1.0/fs * (500.0 /*+ 50.0 * self.current_primitive as f32*/);
+        let freq = 10.0 + if t < 3.0 {t * 2.0} else {if t < 6.0 {t * 300.0 - 900.0} else {1800.0 - 900.0}};
+
+        self.phase += 1.0/fs * (freq /*+ 50.0 * self.current_primitive as f32*/);
 
         let phase = self.phase % 1.0;
 
@@ -82,7 +84,7 @@ impl Intro {
             );
         let (x,y) = (x * 2.0 - 1.0, 1.0 - y * 2.0);
 
-        if t - self.switch_time > 1.0/500.0 && phase < 1.0 {
+        if t - self.switch_time > 1.0/freq && phase < 1.0 {
             self.phase = 0.0;
             // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
 
