@@ -9,15 +9,15 @@ pub struct Point {
     pub y: f32,
 }
 
-fn scale(point: (f32, f32), factor: (f32, f32)) -> (f32, f32) {
+pub fn scale(point: (f32, f32), factor: (f32, f32)) -> (f32, f32) {
     (point.0 * factor.0, point.1 * factor.1)
 }
 
-fn shift(point: (f32, f32), vector: (f32, f32)) -> (f32, f32) {
+pub fn shift(point: (f32, f32), vector: (f32, f32)) -> (f32, f32) {
     (point.0 + vector.0, point.1 + vector.1)
 }
 
-fn rotate(point: (f32, f32), angle: f32) -> (f32, f32) {
+pub fn rotate(point: (f32, f32), angle: f32) -> (f32, f32) {
     (
         point.0 * angle.cos() - point.1 * angle.sin(),
         point.0 * angle.sin() + point.1 * angle.cos()

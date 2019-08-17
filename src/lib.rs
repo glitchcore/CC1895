@@ -20,18 +20,25 @@ mod primitive;
 use primitive::{Primitive};
 
 mod intro;
+mod tuning;
+mod music;
 
 struct Ctx<'a> {
     current_scene: Option<&'a mut Primitive>,
     intro: intro::Intro,
+    tuning: tuning::Tuning,
+    music: music::Music,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    ctx.intro.draw(t, fs)
+    // ctx.intro.draw(t, fs)
+    ctx.tuning.draw(&mut ctx.music, t, fs)
 }
 
 static mut CTX: Ctx = Ctx {
     intro: intro::Intro::new(),
+    tuning: tuning::Tuning::new(),
+    music: music::Music::new(),
     current_scene: None
 };
 
