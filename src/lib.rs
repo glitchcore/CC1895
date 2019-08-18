@@ -2,6 +2,7 @@ extern crate web_sys;
 
 use wasm_bindgen::prelude::*;
 
+#[allow(unused_macros)]
 macro_rules! log {
     ( $( $t:tt )* ) => {
         web_sys::console::log_1(&format!( $( $t )* ).into());
@@ -17,29 +18,29 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use std::f32;
 
 mod primitive;
-use primitive::{Primitive};
 
 mod intro;
 mod tuning;
 mod music;
 
-struct Ctx<'a> {
-    current_scene: Option<&'a mut Primitive>,
+struct Ctx {
     intro: intro::Intro,
     tuning: tuning::Tuning,
     music: music::Music,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    // ctx.intro.draw(t, fs)
-    ctx.tuning.draw(&mut ctx.music, t, fs)
+    if t < 7.0 {
+        ctx.intro.draw(t, fs)
+    } else {
+        ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
+    }
 }
 
 static mut CTX: Ctx = Ctx {
     intro: intro::Intro::new(),
     tuning: tuning::Tuning::new(),
     music: music::Music::new(),
-    current_scene: None
 };
 
 static mut BUFFER: [f32;8192] = [0.0;8192];

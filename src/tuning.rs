@@ -1,4 +1,4 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse, scale, shift, rotate};
+use crate::primitive::{Primitive, Point, Line, Ellipse, shift, rotate};
 
 use std::f32;
 
@@ -49,7 +49,7 @@ impl Tuning {
 
         let kick_line = Line::new(Point{x:0.2, y:0.5}, Point{x:0.8, y:0.5});
 
-        let (x, y) = if music.freq_idx % 4 != 0 {
+        let (x, y) = if music.freq_idx % 4 != 0 || music.bass_idx < 6 {
             let primitives_len = 2;
 
             let primitive_idx = if self.current_primitive < primitives_len {

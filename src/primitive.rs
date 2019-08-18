@@ -24,6 +24,7 @@ pub fn rotate(point: (f32, f32), angle: f32) -> (f32, f32) {
     )
 }
 
+#[allow(dead_code)]
 pub struct Rect {
     width: f32,
     height: f32,
@@ -33,6 +34,7 @@ pub struct Rect {
     scale: (f32, f32)
 }
 
+#[allow(dead_code)]
 impl Rect {
     pub const fn new(width: f32, height: f32) -> Self {
         return Rect {
