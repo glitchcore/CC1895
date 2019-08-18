@@ -27,7 +27,7 @@ impl Tuning {
         }
     }
 
-    pub fn draw(&mut self, music: &mut Music,t: f32, fs: f32) -> (f32, f32) {
+    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
         
         // 10.0 + if t < 3.0 {t * 2.0} else {if t < 6.0 {t * 300.0 - 900.0} else {1800.0 - 900.0}};
 
