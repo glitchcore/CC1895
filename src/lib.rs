@@ -24,6 +24,7 @@ mod tuning;
 mod music;
 mod city;
 mod space;
+mod rocket;
 
 struct Ctx {
     intro: intro::Intro,
@@ -31,6 +32,7 @@ struct Ctx {
     music: music::Music,
     city: city::City,
     space: space::Space,
+    rocket: rocket::Rocket,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
@@ -46,8 +48,12 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
         ctx.city.draw(&mut ctx.music, t, fs);
     }
 
+    if false {
+        ctx.space.draw(&mut ctx.music, t, fs);
+    }
+
     if true {
-        ctx.space.draw(&mut ctx.music, t, fs)
+        ctx.rocket.draw(&mut ctx.music, t, fs)
     } else {
         (0.0, 0.0)
     }
@@ -59,6 +65,7 @@ static mut CTX: Ctx = Ctx {
     music: music::Music::new(),
     city: city::City::new(),
     space: space::Space::new(),
+    rocket: rocket::Rocket::new(),
 };
 
 static mut BUFFER: [f32;8192] = [0.0;8192];
