@@ -4,6 +4,7 @@ pub trait Primitive {
     fn draw(&self, t: f32, fs: f32) -> (f32, f32);
 }
 
+#[derive(Default)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -73,6 +74,7 @@ impl Primitive for Rect {
     }
 }
 
+#[derive(Default)]
 pub struct Line {
     begin: Point,
     end: Point,

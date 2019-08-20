@@ -23,23 +23,33 @@ mod intro;
 mod tuning;
 mod music;
 mod city;
+mod space;
 
 struct Ctx {
     intro: intro::Intro,
     tuning: tuning::Tuning,
     music: music::Music,
     city: city::City,
+    space: space::Space,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    if t < 60.0 {
+    if t < 60.0 && false {
         if t < 7.0 {
-            ctx.intro.draw(t, fs)
+            ctx.intro.draw(t, fs);
         } else {
-            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
+            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs);
         }
+    }
+
+    if false {
+        ctx.city.draw(&mut ctx.music, t, fs);
+    }
+
+    if true {
+        ctx.space.draw(&mut ctx.music, t, fs)
     } else {
-        ctx.city.draw(&mut ctx.music, t, fs)
+        (0.0, 0.0)
     }
 }
 
@@ -48,6 +58,7 @@ static mut CTX: Ctx = Ctx {
     tuning: tuning::Tuning::new(),
     music: music::Music::new(),
     city: city::City::new(),
+    space: space::Space::new(),
 };
 
 static mut BUFFER: [f32;8192] = [0.0;8192];

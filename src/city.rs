@@ -10,6 +10,7 @@ pub struct City {
 
     tower_lines: [Line;6],
     tower_top: Ellipse,
+    tower_signal: Ellipse,
 
     tower_scale: f32,
 }
@@ -30,6 +31,7 @@ impl City {
             ],
             tower_top: Ellipse::new(Point{x:0.5, y:0.9}, 0.05, 0.05),
             tower_scale: 1.0,
+            tower_signal: Ellipse::new(Point{x:0.5, y:0.9}, 0.05, 0.05),
         }
     }
 
@@ -37,15 +39,16 @@ impl City {
         let freq = music.get_freq(fs);
         // let freq = 1000.0;
 
-        self.phase += 1.0/fs * freq;
-
-        if self.tower_scale > 0.2 {
-            self.tower_scale -= 1.0/fs * 0.2;
+        if self.tower_scale > 0.5 {
+            self.tower_scale -= 1.0/fs * 0.5;
         }
+
+        self.tower_signal.scale = (music.kick_freq - 100.0, music.kick_freq/100.0);
 
         let primitives = [
             &self.tower_lines[0] as &Primitive,
             &self.tower_top as &Primitive,
+            &self.tower_signal as &Primitive,
             &self.tower_lines[1] as &Primitive,
             &self.tower_lines[2] as &Primitive,
             &self.tower_lines[3] as &Primitive,
@@ -63,9 +66,9 @@ impl City {
             .draw(if self.current_primitive < primitives.len() {phase} else {1.0 - phase}, fs);
         let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 
-        if t - self.switch_time > 1.0/freq && phase < 1.0 {
+        self.phase += 1.0/fs * freq;
+        if self.phase >= 1.0 {
             self.phase = 0.0;
-            // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
 
             self.switch_time = t;
 
@@ -74,6 +77,8 @@ impl City {
                 self.current_primitive = 0;
             }
         }
+
+        
 
         let (x,y) = scale((x,y), (self.tower_scale, self.tower_scale));
         let (x,y) = shift((x,y), (-(1.0 - self.tower_scale) * 0.5, (1.0 - self.tower_scale) * 0.2));
