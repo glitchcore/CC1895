@@ -17,15 +17,17 @@ impl Rocket {
     }
 
     pub fn draw(&mut self, music: &mut Music, _t: f32, fs: f32) -> (f32, f32) {
+        // let fs = fs * 100.0;
 
         let body_lines = [
-            Line::new(Point{x:0.500, y:0.930}, Point{x:0.520, y:0.830}),
-            Line::new(Point{x:0.520, y:0.830}, Point{x:0.520, y:0.520}),
-            Line::new(Point{x:0.520, y:0.520}, Point{x:0.550, y:0.290}),
-            Line::new(Point{x:0.550, y:0.290}, Point{x:0.450, y:0.290}),
-            Line::new(Point{x:0.450, y:0.290}, Point{x:0.480, y:0.520}),
-            Line::new(Point{x:0.480, y:0.520}, Point{x:0.480, y:0.830}),
-            Line::new(Point{x:0.480, y:0.830}, Point{x:0.500, y:0.930}),
+            Line::new(Point{x:0.500, y:0.930}, Point{x:0.540, y:0.830}),
+            Line::new(Point{x:0.540, y:0.830}, Point{x:0.540, y:0.560}),
+            Line::new(Point{x:0.540, y:0.560}, Point{x:0.590, y:0.290}),
+            Line::new(Point{x:0.590, y:0.290}, Point{x:0.410, y:0.290}),
+            Line::new(Point{x:0.410, y:0.290}, Point{x:0.460, y:0.560}),
+            Line::new(Point{x:0.460, y:0.560}, Point{x:0.460, y:0.830}),
+            Line::new(Point{x:0.460, y:0.830}, Point{x:0.540, y:0.830}),
+            Line::new(Point{x:0.460, y:0.830}, Point{x:0.500, y:0.930}),
         ];
 
         let freq = music.get_freq(fs);
