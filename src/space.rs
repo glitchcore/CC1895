@@ -1,4 +1,4 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse, scale, shift};
+use crate::primitive::{Primitive, Point, Line, Ellipse};
 
 use std::f32;
 use crate::music::Music;
@@ -9,6 +9,11 @@ pub struct Space {
     angle: f32,
 }
 
+
+/*
+TODO
+Рисовать центр корпуса четвертинками, и линии двойным штрихом
+*/
 
 impl Space {
     pub const fn new() -> Self {
