@@ -6,6 +6,10 @@ use crate::music::Music;
 pub struct Chip {
     current_primitive: usize,
     phase: f32,
+
+    rotate: f32,
+    shift: (f32, f32),
+    scale: (f32, f32)
 }
 
 impl Chip {
@@ -13,6 +17,10 @@ impl Chip {
         Chip {
             current_primitive: 0,
             phase: 0.0,
+            
+            rotate: 0.0,
+            shift: (0.0, 0.0),
+            scale: (1.0, 1.0),
         }
     }
 
@@ -135,6 +143,10 @@ impl Chip {
                 self.current_primitive = 0;
             }
         }
+
+        let (x, y) = scale((x, y), self.scale);
+        let (x, y) = rotate((x, y), self.rotate);
+        let (x, y) = shift((x, y), self.shift);
 
         return (x, y);
     }
