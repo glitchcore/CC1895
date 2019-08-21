@@ -1,6 +1,7 @@
 use crate::primitive::{Primitive, Point, Line, Ellipse};
 
-use std::f32;
+use core::f32;
+use crate::math::Math;
 use crate::music::Music;
 
 pub struct Space {

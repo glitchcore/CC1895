@@ -1,4 +1,5 @@
-use std::f32;
+use core::f32;
+use crate::math::Math;
 
 pub trait Primitive {
     fn draw(&self, t: f32, fs: f32) -> (f32, f32);

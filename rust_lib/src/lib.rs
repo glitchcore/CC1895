@@ -1,23 +1,31 @@
-extern crate web_sys;
+// extern crate web_sys;
 
-use wasm_bindgen::prelude::*;
+// use wasm_bindgen::prelude::*;
 
+/*
 #[allow(unused_macros)]
 macro_rules! log {
     ( $( $t:tt )* ) => {
         web_sys::console::log_1(&format!( $( $t )* ).into());
     }
 }
+*/
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
+/*
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+*/
+#![cfg_attr(not(unix), no_std)]
 
-use std::f32;
+#![feature(core_intrinsics)]
+
+use core::f32;
 
 mod primitive;
+mod math;
 
 mod intro;
 mod tuning;
@@ -33,19 +41,27 @@ struct Ctx {
     city: city::City,
     space: space::Space,
     rocket: rocket::Rocket,
+    t: f32,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    if t < 60.0 && false {
+    /*
+    if t < 60.0 {
         if t < 7.0 {
-            ctx.intro.draw(t, fs);
+            ctx.intro.draw(t, fs)
         } else {
-            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs);
+            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
         }
+    } else {
+        ctx.city.draw(&mut ctx.music, t, fs)
     }
+    */
 
+    ctx.space.draw(&mut ctx.music, t, fs)
+
+    /*
     if false {
-        ctx.city.draw(&mut ctx.music, t, fs);
+        
     }
 
     if false {
@@ -57,6 +73,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
     } else {
         (0.0, 0.0)
     }
+    */
 }
 
 static mut CTX: Ctx = Ctx {
@@ -66,25 +83,27 @@ static mut CTX: Ctx = Ctx {
     city: city::City::new(),
     space: space::Space::new(),
     rocket: rocket::Rocket::new(),
+    t: 0.0,
 };
 
+/*
 static mut BUFFER: [f32;8192] = [0.0;8192];
 
-#[wasm_bindgen]
+// #[wasm_bindgen]
 pub fn get_buffer() -> *const f32 {
     unsafe {
         BUFFER.as_ptr()
     }
 }
 
-#[wasm_bindgen]
+// #[wasm_bindgen]
 pub fn get_buffer_len() -> usize {
     unsafe {
         BUFFER.len()
     }
 }
 
-#[wasm_bindgen]
+// #[wasm_bindgen]
 pub fn request_frame(init_t: f32, fs: f32) -> f32 {
     let mut t = init_t;
 
@@ -101,4 +120,28 @@ pub fn request_frame(init_t: f32, fs: f32) -> f32 {
     }
 
     return t;
+}
+*/
+
+#[repr(C)]
+pub struct PointRes {
+    x: f32,
+    y: f32,
+}
+
+#[no_mangle]
+pub extern "C" fn request_sample(fs: f32) -> PointRes {
+    unsafe {
+        CTX.t += 1.0/fs;
+        let (x,y) = process_sample(&mut CTX, CTX.t, fs);
+
+        PointRes {x, y}
+    }
+}
+
+use core::panic::PanicInfo;
+
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    loop {}
 }
