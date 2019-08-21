@@ -28,7 +28,7 @@ impl Chip {
     	const PADDING: f32 = 0.05;
     	const PIN_LENGTH: f32 = 0.08;
 
-    	let freq = 1000.0; // music.get_freq(fs);
+    	let freq = 2000.0; // music.get_freq(fs);
 
     	let phase = self.phase % 1.0;
 
@@ -75,11 +75,11 @@ impl Chip {
             pins[i + PIN_COUNT * 1] = Line::new(
                 Point{
                     x:CENTER_X + WIDTH/2.0,
-                    y:CENTER_Y - HEIGHT/2.0 + PADDING + (PIN_COUNT - i) as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * spacing_y
                 },
                 Point{
                     x:CENTER_X + WIDTH/2.0 + PIN_LENGTH,
-                    y:CENTER_Y - HEIGHT/2.0  + PADDING + (PIN_COUNT - i) as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * spacing_y
                 }
             );
         }
@@ -88,11 +88,11 @@ impl Chip {
         for i in 0..PIN_COUNT {
             pins[i + PIN_COUNT * 2] = Line::new(
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + PADDING + (PIN_COUNT - i) as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * spacing_x,
                     y:CENTER_Y - HEIGHT/2.0
                 },
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + PADDING + (PIN_COUNT - i) as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * spacing_x,
                     y:CENTER_Y - HEIGHT/2.0 - PIN_LENGTH
                 }
             );
