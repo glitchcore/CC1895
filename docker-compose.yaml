@@ -1,0 +1,14 @@
+version: '3'
+services:
+  dev:
+    image: kviver/sdk:nrf5-2019-07-18
+    user: ${FIXUID:-1000}:${FIXGID:-1000}
+    privileged: true
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/project
+      - .docker/cache/cargo_registry:/home/developer/.cargo/registry
+      - .docker/fixuid.yml:/etc/fixuid/config.yml
+      - /dev/bus/usb:/dev/bus/usb
+    working_dir: "/project/nucleo_476"
