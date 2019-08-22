@@ -1,5 +1,6 @@
 // use crate::primitive::{/*Primitive, Point, Line, Ellipse,*/ rotate, scale, shift};
 use crate::chip::Chip;
+use crate::primitive::Primitive;
 
 use std::f32;
 use crate::music::Music;
@@ -19,10 +20,10 @@ impl ChipWorld {
         }
     }
 
-    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
+    pub fn draw(&mut self, _music: &mut Music, _t: f32, fs: f32) -> (f32, f32) {
     	// let fs = fs * 100.0;
 
-    	let freq = 1000.0; // music.get_freq(fs);
+    	let freq = 100.0; // music.get_freq(fs);
 
         self.chips[0].shift = (-0.3,-0.3);
         self.chips[0].scale = (0.5, 0.5);
@@ -30,7 +31,7 @@ impl ChipWorld {
         self.chips[1].shift = (0.3,0.3);
         self.chips[1].scale = (0.5, 0.5);
 
-        let (x,y) = self.chips[self.current_primitive].draw(freq, t, fs);
+        let (x,y) = self.chips[self.current_primitive].draw(self.phase, fs);
 
     	let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 

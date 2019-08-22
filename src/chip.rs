@@ -1,11 +1,8 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse, rotate, scale, shift};
+use crate::primitive::{Primitive, Point, Line, rotate, scale, shift};
 
 use std::f32;
 
 pub struct Chip {
-    current_primitive: usize,
-    phase: f32,
-
     pub rotate: f32,
     pub shift: (f32, f32),
     pub scale: (f32, f32)
@@ -13,31 +10,28 @@ pub struct Chip {
 
 impl Chip {
     pub const fn new() -> Self {
-        Chip {
-            current_primitive: 0,
-            phase: 0.0,
-            
+            Chip {            
             rotate: 0.0,
             shift: (0.0, 0.0),
             scale: (1.0, 1.0),
         }
     }
+}
 
-    pub fn draw(&mut self, freq: f32, _t: f32, fs: f32) -> (f32, f32) {
+impl Primitive for Chip {
+    fn draw(&self, t: f32, fs: f32) -> (f32, f32) {
     	// let fs = fs * 100.0;
+        const WIDTH: f32 = 0.5;
+        const HEIGHT: f32 = 0.5;
+        const CENTER_X: f32 = 0.5;
+        const CENTER_Y: f32 = 0.5;
 
-    	const WIDTH: f32 = 0.5;
-    	const HEIGHT: f32 = 0.5;
-    	const CENTER_X: f32 = 0.5;
-    	const CENTER_Y: f32 = 0.5;
+        const PIN_COUNT: usize = 8;
+        const PADDING: f32 = 0.05;
+        const PIN_LENGTH: f32 = 0.08;
 
-    	const PIN_COUNT: usize = 8;
-    	const PADDING: f32 = 0.05;
-    	const PIN_LENGTH: f32 = 0.08;
 
-    	let phase = self.phase % 1.0;
-
-    	let body = [
+    	const BODY: [Line;4] = [
     		Line::new(
     			Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0},
     			Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0}
@@ -58,18 +52,18 @@ impl Chip {
 
         let mut pins: [Line; PIN_COUNT * 4] = Default::default();
 
-        let spacing_x = (WIDTH - PADDING) / PIN_COUNT as f32;
-        let spacing_y= (HEIGHT - PADDING) / PIN_COUNT as f32;
+        const SPACING_X: f32 = (WIDTH - PADDING) / PIN_COUNT as f32;
+        const SPACING_Y: f32 = (HEIGHT - PADDING) / PIN_COUNT as f32;
 
         // top
         for i in 0..PIN_COUNT {
             pins[i + PIN_COUNT * 0] = Line::new(
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + PADDING + i as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + PADDING + i as f32 * SPACING_X,
                     y:CENTER_Y + HEIGHT/2.0
                 },
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + PADDING + i as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + PADDING + i as f32 * SPACING_X,
                     y:CENTER_Y + HEIGHT/2.0 + PIN_LENGTH
                 }
             );
@@ -80,11 +74,11 @@ impl Chip {
             pins[i + PIN_COUNT * 1] = Line::new(
                 Point{
                     x:CENTER_X + WIDTH/2.0,
-                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * SPACING_Y
                 },
                 Point{
                     x:CENTER_X + WIDTH/2.0 + PIN_LENGTH,
-                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0 + (PIN_COUNT - i) as f32 * SPACING_Y
                 }
             );
         }
@@ -93,11 +87,11 @@ impl Chip {
         for i in 0..PIN_COUNT {
             pins[i + PIN_COUNT * 2] = Line::new(
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * SPACING_X,
                     y:CENTER_Y - HEIGHT/2.0
                 },
                 Point{
-                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * spacing_x,
+                    x:CENTER_X - WIDTH/2.0 + (PIN_COUNT - i) as f32 * SPACING_X,
                     y:CENTER_Y - HEIGHT/2.0 - PIN_LENGTH
                 }
             );
@@ -108,37 +102,29 @@ impl Chip {
             pins[i + PIN_COUNT * 3] = Line::new(
                 Point{
                     x:CENTER_X - WIDTH/2.0,
-                    y:CENTER_Y - HEIGHT/2.0 + PADDING + i as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0 + PADDING + i as f32 * SPACING_Y
                 },
                 Point{
                     x:CENTER_X - WIDTH/2.0 - PIN_LENGTH,
-                    y:CENTER_Y - HEIGHT/2.0  + PADDING + i as f32 * spacing_y
+                    y:CENTER_Y - HEIGHT/2.0  + PADDING + i as f32 * SPACING_Y
                 }
             );
         }
 
-        
-
-        let mut primitives = body.iter().chain(pins.iter());
+        let mut primitives = BODY.iter().chain(pins.iter());
 
         let primitives_len = primitives.size_hint().1.unwrap();
 
-    	let (x, y) = (primitives.nth(if self.current_primitive < primitives_len {
-            self.current_primitive
+        let phase = (t * primitives_len as f32) % 1.0;
+
+        let current_primitive = (t * primitives_len as f32) as usize;
+
+    	let (x, y) = (primitives.nth(if current_primitive < primitives_len {
+            current_primitive
         } else {
-            2 * primitives_len - self.current_primitive - 1
+            2 * primitives_len - current_primitive - 1
         }).unwrap() as &Primitive)
-            .draw(if self.current_primitive < primitives_len {phase} else {1.0 - phase}, fs);
-
-        self.phase += 1.0/fs * freq;
-        if self.phase >= 1.0 {
-            self.phase = 0.0;
-
-            self.current_primitive += 1;
-            if self.current_primitive >= 2 * primitives_len {
-                self.current_primitive = 0;
-            }
-        }
+            .draw(if current_primitive < primitives_len {phase} else {1.0 - phase}, fs);
 
         let (x,y) = shift((x,y), (-0.5, -0.5));
         let (x, y) = scale((x, y), self.scale);
