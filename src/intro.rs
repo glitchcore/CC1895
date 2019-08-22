@@ -4,7 +4,6 @@ use std::f32;
 
 pub struct Intro {
     current_primitive: usize,
-    switch_time: f32,
     phase: f32,
     line_1_0: Line,
     line_1_1: Line,
@@ -24,7 +23,6 @@ impl Intro {
     pub const fn new() -> Self {
         Intro {
             current_primitive: 0,
-            switch_time: 0.0,
             phase: 0.0,
             line_1_0: Line::new(Point{x:0.14, y:0.35}, Point{x:0.05, y:0.39}),
             line_1_1: Line::new(Point{x:0.14, y:0.35}, Point{x:0.14, y:0.64}),
@@ -47,7 +45,7 @@ impl Intro {
 
         self.phase += 1.0/fs * (freq /*+ 50.0 * self.current_primitive as f32*/);
 
-        let phase = self.phase % 1.0;
+        let phase = self.phase;
 
         self.ell_9_0.rotate = f32::consts::PI;
         self.ell_9_1.rotate = f32::consts::PI;
@@ -84,11 +82,8 @@ impl Intro {
             );
         let (x,y) = (x * 2.0 - 1.0, 1.0 - y * 2.0);
 
-        if t - self.switch_time > 1.0/freq && phase < 1.0 {
+        if self.phase > 1.0 {
             self.phase = 0.0;
-            // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
-
-            self.switch_time = t;
 
             self.current_primitive += 1;
             if self.current_primitive >= 2 * primitives.len() {

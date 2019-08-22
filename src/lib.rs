@@ -39,6 +39,8 @@ struct Ctx {
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
+    ctx.intro.draw(t, fs)
+    /*
     if t < 60.0 && false {
         if t < 7.0 {
             ctx.intro.draw(t, fs);
@@ -66,6 +68,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
     if true {
         ctx.chip_world.draw(&mut ctx.music, t, fs)
     } else {(0.0, 0.0)}
+    */
 }
 
 static mut CTX: Ctx = Ctx {
