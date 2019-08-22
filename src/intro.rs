@@ -5,6 +5,7 @@ use std::f32;
 pub struct Intro {
     current_primitive: usize,
     phase: f32,
+    p_fade: f32,
     line_1_0: Line,
     line_1_1: Line,
 
@@ -24,6 +25,7 @@ impl Intro {
         Intro {
             current_primitive: 0,
             phase: 0.0,
+            p_fade: 1.0,
             line_1_0: Line::new(Point{x:0.14, y:0.35}, Point{x:0.05, y:0.39}),
             line_1_1: Line::new(Point{x:0.14, y:0.35}, Point{x:0.14, y:0.64}),
 
@@ -41,7 +43,18 @@ impl Intro {
     }
 
     pub fn draw(&mut self, t: f32, fs: f32) -> (f32, f32) {
-        let freq = 10.0 + if t < 3.0 {t * 2.0} else {if t < 6.0 {t * 300.0 - 900.0} else {1800.0 - 900.0}};
+        let freq = 10.0 +
+            if t < 3.0 {t * 2.0}
+            else {
+                if t < 6.0 {t * 300.0 - 900.0}
+                else {1800.0 - 900.0}
+            };
+
+        if t > 6.0 {
+            if self.p_fade > 0.0 {
+                self.p_fade -= 1.0/fs * 2.0;
+            }
+        }
 
         self.phase += 1.0/fs * (freq /*+ 50.0 * self.current_primitive as f32*/);
 
@@ -58,6 +71,12 @@ impl Intro {
         self.ell_5_2.rotate = 0.5;
 
         self.ell_8_1.rotate = f32::consts::PI;
+
+        self.line_1_0.scale = p_fade;
+        self.line_1_1.scale = p_fade;
+        self.line_5_0.scale = p_fade;
+        self.line_5_1.scale = p_fade;
+
 
         let primitives = [
             &self.line_1_0 as &Primitive,

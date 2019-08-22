@@ -30,9 +30,9 @@ pub struct Rect {
     width: f32,
     height: f32,
 
-    rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub rotate: f32,
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 #[allow(dead_code)]
@@ -80,8 +80,8 @@ pub struct Line {
     end: Point,
 
     pub rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 impl Line {
