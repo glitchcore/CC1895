@@ -10,6 +10,8 @@ pub struct Tuning {
     phase: f32,
     angle: f32,
 
+    angle_idx: usize,
+
     line: Line,
     circle: Ellipse,
 }
@@ -21,6 +23,7 @@ impl Tuning {
             switch_time: 0.0,
             phase: 0.0,
             angle: 0.0,
+            angle_idx: 0,
 
             line: Line::new(Point{x:0.2, y:0.0}, Point{x:0.1, y:0.0}),
             circle: Ellipse::new(Point{x:0.5, y:0.5}, 0.2, 0.2),
@@ -34,18 +37,40 @@ impl Tuning {
         let freq = music.get_freq(fs);
         self.phase += 1.0/fs * freq; /*+ 50.0 * self.current_primitive as f32*/;
 
-        let phase = self.phase % 1.0;
+        let phase = self.phase;
 
+        const ANGLES: [(f32, f32); 8] = [
+            (3.0, 3.0),
+            (2.0, -1.0),
+            (0.0, -5.0),
+            (-2.0, -2.0),
+            (4.0, -4.1),
+            (5.8, 4.1),
+            (4.1, -4.1),
+            (5.9, 5.4),
+        ];
+
+        /*
         if music.bass_idx == 0 {
             self.angle = (music.freq_idx / 2) as f32 * 3.8;
         }
+        */
+        self.angle += 1.0/fs * ANGLES[self.angle_idx].1;
 
-        self.angle += 0.0003 * (music.bass_idx % 5) as f32;
+        let need_change = if ANGLES[self.angle_idx].1 > 0.0 {
+            self.angle > ANGLES[self.angle_idx].0
+        } else {
+            self.angle < ANGLES[self.angle_idx].0
+        };
+
+        if need_change {
+            self.angle_idx += 1;
+            if self.angle_idx >= ANGLES.len() {
+                self.angle_idx = 0;
+            }
+        }
 
         self.circle.rotate = f32::consts::PI * 1.5 + self.angle;
-
-
-        
 
         let kick_line = Line::new(Point{x:0.2, y:0.5}, Point{x:0.8, y:0.5});
 
@@ -58,7 +83,7 @@ impl Tuning {
                 2 * primitives_len - self.current_primitive - 1
             };
 
-            if t - self.switch_time > 1.0/freq && phase < 1.0 {
+            if self.phase > 1.0 {
                 self.phase = 0.0;
                 // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
 

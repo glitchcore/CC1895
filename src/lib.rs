@@ -39,7 +39,7 @@ struct Ctx {
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    ctx.intro.draw(t, fs)
+    ctx.tuning.draw(&mut ctx.music, t, fs)
     /*
     if t < 60.0 && false {
         if t < 7.0 {
