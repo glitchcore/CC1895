@@ -1,15 +1,14 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse};
+use crate::primitive::{Primitive, Point, Line, Ellipse, rotate, scale, shift};
 
 use std::f32;
-use crate::music::Music;
 
 pub struct Chip {
     current_primitive: usize,
     phase: f32,
 
-    rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub rotate: f32,
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 impl Chip {
@@ -24,7 +23,7 @@ impl Chip {
         }
     }
 
-    pub fn draw(&mut self, music: &mut Music, _t: f32, fs: f32) -> (f32, f32) {
+    pub fn draw(&mut self, freq: f32, _t: f32, fs: f32) -> (f32, f32) {
     	// let fs = fs * 100.0;
 
     	const WIDTH: f32 = 0.5;
@@ -35,8 +34,6 @@ impl Chip {
     	const PIN_COUNT: usize = 8;
     	const PADDING: f32 = 0.05;
     	const PIN_LENGTH: f32 = 0.08;
-
-    	let freq = 2000.0; // music.get_freq(fs);
 
     	let phase = self.phase % 1.0;
 
@@ -132,7 +129,6 @@ impl Chip {
             2 * primitives_len - self.current_primitive - 1
         }).unwrap() as &Primitive)
             .draw(if self.current_primitive < primitives_len {phase} else {1.0 - phase}, fs);
-    	let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 
         self.phase += 1.0/fs * freq;
         if self.phase >= 1.0 {
@@ -144,9 +140,10 @@ impl Chip {
             }
         }
 
+        let (x,y) = shift((x,y), (-0.5, -0.5));
         let (x, y) = scale((x, y), self.scale);
         let (x, y) = rotate((x, y), self.rotate);
-        let (x, y) = shift((x, y), self.shift);
+        let (x, y) = shift((x, y), (self.shift.0 + 0.5, self.shift.1 + 0.5));
 
         return (x, y);
     }

@@ -26,6 +26,7 @@ mod city;
 mod space;
 mod rocket;
 mod chip;
+mod chip_world;
 
 struct Ctx {
     intro: intro::Intro,
@@ -34,7 +35,7 @@ struct Ctx {
     city: city::City,
     space: space::Space,
     rocket: rocket::Rocket,
-    chip: chip::Chip,
+    chip_world: chip_world::ChipWorld,
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
@@ -63,7 +64,7 @@ fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
     }
 
     if true {
-        ctx.chip.draw(&mut ctx.music, t, fs)
+        ctx.chip_world.draw(&mut ctx.music, t, fs)
     } else {(0.0, 0.0)}
 }
 
@@ -74,7 +75,7 @@ static mut CTX: Ctx = Ctx {
     city: city::City::new(),
     space: space::Space::new(),
     rocket: rocket::Rocket::new(),
-    chip: chip::Chip::new(),
+    chip_world: chip_world::ChipWorld::new(),
 };
 
 static mut BUFFER: [f32;8192] = [0.0;8192];
