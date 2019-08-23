@@ -39,18 +39,14 @@ struct Ctx {
 }
 
 fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {    
-    
-    if t < 7.0 {
-        ctx.intro.draw(t, fs)
-    } else {
-        ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
+    match (t * 1000.0) as i32 {
+        -1...0 => ctx.intro.draw(t, fs),
+        0...1000 => ctx.tuning.draw(&mut ctx.music, t + 5.0, fs),
+        1000...5000 => ctx.city.draw(&mut ctx.music, t, fs),
+        _ => (0.0, 0.0)
     }
 
     /*
-
-    if false {
-        ctx.city.draw(&mut ctx.music, t, fs);
-    }
 
     if false {
         ctx.space.draw(&mut ctx.music, t, fs);

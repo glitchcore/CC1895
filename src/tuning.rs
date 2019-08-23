@@ -50,10 +50,8 @@ impl Tuning {
         let phase = self.phase;
 
         if t > 5.0 {
-            if t > 5.0 {
-                if self.p_infade > 0.0 {
-                    self.p_infade -= 1.0/fs * 1.0;
-                }
+            if self.p_infade > 0.0 {
+                self.p_infade -= 1.0/fs * 1.0;
             }
         } else {
             if self.p_infade < 1.0 {
@@ -114,6 +112,10 @@ impl Tuning {
                 if self.freq_idx >= FREQS.len() {
                     self.freq_idx = 0;
                 }
+        }
+
+        if self.p_infade < 0.6 {
+            self.freq_idx = 0;
         }
 
         self.circle.rotate = f32::consts::PI * 1.5 + self.angle;
