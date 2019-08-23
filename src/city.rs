@@ -2,6 +2,7 @@ use crate::primitive::{Primitive, Point, Line, Ellipse, interp, scale, rotate, s
 
 use std::f32;
 use crate::music::Music;
+use crate::rocket::Rocket;
 
 struct Tower {
     tower_lines: [Line;6],
@@ -77,7 +78,7 @@ impl City {
             horizon: Line::new(Point{x:0.0, y:0.0}, Point{x:1.0, y:0.0}),
             
             tower_scale: 1.0,
-            signal_phase: 0.0,
+            signal_phase: 1.0,
         }
     }
 
@@ -92,7 +93,7 @@ impl City {
         }
         
         if self.p_infade < 1.0 {
-            self.p_infade += 1.0/fs * 0.5;
+            self.p_infade += 1.0/fs * 2.0;
         }
 
         let _p_fade = 1.0 - self.p_infade;
@@ -137,24 +138,37 @@ impl City {
             self.p_infade * 0.5 * self.tower_scale
         );
 
-        let primitives = [
+        let void = Line::new(Point{x:0.0, y:0.0}, Point{x:0.0, y:0.0});
+
+        let rocket = Rocket::new();
+
+        let primitives = if t < 1.0 {[
             &self.tower as &Primitive,
             &tower_top as &Primitive,
             &self.horizon as &Primitive,
-        ];
+        ]} else {
+            [
+                &void as &Primitive,
+                &rocket as &Primitive,
+                &self.horizon as &Primitive,
+            ]
+        };
 
-        self.signal_phase += 1.0/fs * 2.0;
-        if self.signal_phase >= 1.0 {
-            self.signal_phase = 0.0;
+        if t > 0.8 {
+            self.signal_phase += 1.0/fs * 2.0;
+
+            if self.signal_phase >= 1.0 {
+                self.signal_phase = 0.0;
+            }
         }
 
         let phase = self.phase % 1.0;
 
-        let (x, y) = if self.signal_phase < 0.2 {
+        let (x, y) = if self.signal_phase < 0.4 {
             let tower_signal = Ellipse::new(
                 Point{x:top_end.0, y:top_end.1},
-                tower_top.a + self.signal_phase * 2.0,
-                tower_top.b + self.signal_phase * 2.0
+                tower_top.a + self.signal_phase * 1.0,
+                tower_top.b + self.signal_phase * 1.0
             );
 
             tower_signal.draw(phase, fs)

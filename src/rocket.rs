@@ -1,22 +1,25 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse};
+use crate::primitive::{Primitive, Point, Line, scale, rotate, shift};
 
 use std::f32;
-use crate::music::Music;
 
 pub struct Rocket {
-    current_primitive: usize,
-    phase: f32,
+    pub rotate: f32,
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 impl Rocket {
     pub const fn new() -> Self {
         Rocket {
-            current_primitive: 0,
-            phase: 0.0,
+            rotate: 0.0,
+            shift: (0.0, 0.0),
+            scale: (1.0, 1.0),
         }
     }
+}
 
-    pub fn draw(&mut self, music: &mut Music, _t: f32, fs: f32) -> (f32, f32) {
+impl Primitive for Rocket {
+    fn draw(&self, t: f32, fs: f32) -> (f32, f32) {
         // let fs = fs * 100.0;
 
         let body_lines = [
@@ -30,28 +33,24 @@ impl Rocket {
             Line::new(Point{x:0.460, y:0.830}, Point{x:0.500, y:0.930}),
         ];
 
-        let freq = music.get_freq(fs);
+        let primitives_len = body_lines.len();
 
-        let phase = self.phase % 1.0;
+        let phase = (t * primitives_len as f32) % 1.0;
 
-        let (x, y) = body_lines[if self.current_primitive < body_lines.len() {
-            self.current_primitive
+        let current_primitive = (t * primitives_len  as f32) as usize;
+
+        let (x, y) = body_lines[if current_primitive < primitives_len {
+            current_primitive
         } else {
-            2 * body_lines.len() - self.current_primitive - 1
+            (2 * primitives_len - current_primitive - 1) % primitives_len
         }]
-            .draw(if self.current_primitive < body_lines.len() {phase} else {1.0 - phase}, fs);
-        let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
+            .draw(if current_primitive < primitives_len {phase} else {1.0 - phase}, fs);
 
-        self.phase += 1.0/fs * freq;
-        if self.phase >= 1.0 {
-            self.phase = 0.0;
+        let (x,y) = shift((x,y), (-0.5, -0.5));
+        let (x, y) = scale((x, y), self.scale);
+        let (x, y) = rotate((x, y), self.rotate);
+        let (x, y) = shift((x, y), (self.shift.0 + 0.5, self.shift.1 + 0.5));
 
-            self.current_primitive += 1;
-            if self.current_primitive >= 2 * body_lines.len() {
-                self.current_primitive = 0;
-            }
-        }
-
-        return (x, y);
+        (x, y)
     }
 }
