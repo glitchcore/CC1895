@@ -116,8 +116,8 @@ impl Primitive for Line {
 }
 
 pub struct Ellipse {
-    a: f32,
-    b: f32,
+    pub a: f32,
+    pub b: f32,
 
     pub begin: f32,
     pub end: f32,

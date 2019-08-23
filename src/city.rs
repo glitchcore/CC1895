@@ -60,9 +60,8 @@ pub struct City {
 
     horizon: Line,
 
-    tower_signal: Ellipse,
-
     tower_scale: f32,
+    signal_phase: f32,
 }
 
 impl City {
@@ -78,7 +77,7 @@ impl City {
             horizon: Line::new(Point{x:0.0, y:0.0}, Point{x:1.0, y:0.0}),
             
             tower_scale: 1.0,
-            tower_signal: Ellipse::new(Point{x:0.5, y:0.9}, 0.00, 0.00),
+            signal_phase: 0.0,
         }
     }
 
@@ -114,10 +113,15 @@ impl City {
 
         const TOP_END: (f32, f32) = (0.2, 0.15);
 
+        let top_end = (
+            interp(0.5 - self.p_infade * TOP_END.0, 0.2, self.tower_scale),
+            interp(0.5 + TOP_END.1 * self.p_infade, 0.3, self.tower_scale)
+        );
+
         let tower_top = Ellipse::new(
             Point{
-                x: interp(0.5 - self.p_infade * TOP_END.0, 0.2, self.tower_scale),
-                y: interp(0.5 + TOP_END.1 * self.p_infade, 0.3, self.tower_scale)
+                x: top_end.0,
+                y: top_end.1
             },
             (0.3 - self.p_infade * (0.3 - 0.02)) * self.tower_scale,
             (0.3 - self.p_infade * (0.3 - 0.02)) * self.tower_scale
@@ -139,14 +143,30 @@ impl City {
             &self.horizon as &Primitive,
         ];
 
+        self.signal_phase += 1.0/fs * 2.0;
+        if self.signal_phase >= 1.0 {
+            self.signal_phase = 0.0;
+        }
+
         let phase = self.phase % 1.0;
 
-        let (x, y) = primitives[if self.current_primitive < primitives.len() {
-            self.current_primitive
+        let (x, y) = if self.signal_phase < 0.2 {
+            let tower_signal = Ellipse::new(
+                Point{x:top_end.0, y:top_end.1},
+                tower_top.a + self.signal_phase * 2.0,
+                tower_top.b + self.signal_phase * 2.0
+            );
+
+            tower_signal.draw(phase, fs)
         } else {
-            2 * primitives.len() - self.current_primitive - 1
-        }]
-            .draw(if self.current_primitive < primitives.len() {phase} else {1.0 - phase}, fs);
+            primitives[if self.current_primitive < primitives.len() {
+                self.current_primitive
+            } else {
+                2 * primitives.len() - self.current_primitive - 1
+            }]
+                .draw(if self.current_primitive < primitives.len() {phase} else {1.0 - phase}, fs)
+        };
+
         let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 
         self.phase += 1.0/fs * freq;
