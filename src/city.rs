@@ -142,7 +142,7 @@ impl City {
 
         let rocket = Rocket::new();
 
-        let primitives = if t < 1.0 {[
+        let primitives = if t < 8.0 {[
             &self.tower as &Primitive,
             &tower_top as &Primitive,
             &self.horizon as &Primitive,
