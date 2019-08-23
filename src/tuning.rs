@@ -14,6 +14,8 @@ pub struct Tuning {
     freq_idx: usize,
     freq_switch_time: f32,
 
+    p_infade: f32,
+
     line: Line,
     circle: Ellipse,
 }
@@ -26,6 +28,8 @@ impl Tuning {
             phase: 0.0,
             angle: 0.0,
             angle_idx: 0,
+
+            p_infade: 0.0,
 
             freq_idx: 0,
             freq_switch_time: 0.0,
@@ -44,6 +48,20 @@ impl Tuning {
         }
 
         let phase = self.phase;
+
+        if t > 5.0 {
+            if t > 5.0 {
+                if self.p_infade > 0.0 {
+                    self.p_infade -= 1.0/fs * 1.0;
+                }
+            }
+        } else {
+            if self.p_infade < 1.0 {
+                self.p_infade += 1.0/fs * 1.0;
+            }
+        }
+
+        self.line.scale = (self.p_infade, 1.0);
 
         const ANGLES: [(f32, f32); 14] = [
             (3.0, 3.0),

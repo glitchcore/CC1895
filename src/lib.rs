@@ -38,16 +38,15 @@ struct Ctx {
     chip_world: chip_world::ChipWorld,
 }
 
-fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    ctx.tuning.draw(&mut ctx.music, t, fs)
-    /*
-    if t < 60.0 && false {
-        if t < 7.0 {
-            ctx.intro.draw(t, fs);
-        } else {
-            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs);
-        }
+fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {    
+    
+    if t < 7.0 {
+        ctx.intro.draw(t, fs)
+    } else {
+        ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
     }
+
+    /*
 
     if false {
         ctx.city.draw(&mut ctx.music, t, fs);
