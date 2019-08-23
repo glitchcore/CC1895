@@ -80,7 +80,7 @@ impl City {
 
             tower: Tower::new(),
 
-            horizon: Line::new(Point{x:0.0, y:0.0}, Point{x:1.0, y:0.0}),
+            horizon: Line::new(Point{x:0.0, y:0.3}, Point{x:1.0, y:0.3}),
             
             tower_scale: 1.0,
             signal_phase: 1.0,
@@ -105,7 +105,7 @@ impl City {
 
         let _p_fade = 1.0 - self.p_infade;
 
-        self.horizon.shift = (0.0, 0.3 * self.p_infade);
+        self.horizon.shift = (0.0, 0.3 - 0.3 * self.p_infade);
 
         const TOP_END: (f32, f32) = (0.2, 0.15);
 
@@ -171,6 +171,10 @@ impl City {
         }
 
         rocket.scale = (self.rocket_infade, self.rocket_infade);
+        rocket.shift = (
+            interp(0.0, 0.1, self.rocket_infade),
+            interp(-0.2, -0.2, self.rocket_infade)
+        );
 
         let primitives = [
             &rocket as &Primitive,
@@ -206,10 +210,10 @@ impl City {
         let freq = music.get_freq(fs);
         // let freq = 1000.0;
 
-        let (x,y)  = if t < 8.0 {
+        let (x,y)  = if t < 0.0 {
             self.draw_tower(t, fs)
         } else {
-            self.draw_rocket(t - 8.0, fs)
+            self.draw_rocket(t - 0.0, fs)
         };
 
         if t > 0.8 {
