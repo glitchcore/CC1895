@@ -9,8 +9,10 @@ pub struct Tuning {
     switch_time: f32,
     phase: f32,
     angle: f32,
-
     angle_idx: usize,
+
+    freq_idx: usize,
+    freq_switch_time: f32,
 
     line: Line,
     circle: Ellipse,
@@ -25,17 +27,21 @@ impl Tuning {
             angle: 0.0,
             angle_idx: 0,
 
-            line: Line::new(Point{x:0.2, y:0.0}, Point{x:0.1, y:0.0}),
-            circle: Ellipse::new(Point{x:0.5, y:0.5}, 0.2, 0.2),
+            freq_idx: 0,
+            freq_switch_time: 0.0,
+
+            line: Line::new(Point{x:0.3, y:0.0}, Point{x:0.2, y:0.0}),
+            circle: Ellipse::new(Point{x:0.5, y:0.5}, 0.3, 0.3),
         }
     }
 
     pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
-        
-        // 10.0 + if t < 3.0 {t * 2.0} else {if t < 6.0 {t * 300.0 - 900.0} else {1800.0 - 900.0}};
+        let freq = if FREQS[self.freq_idx].0 == 0.0 {300.0} else {50.0};  // music.get_freq(fs)
+        self.phase += 1.0/fs * freq;
 
-        let freq = music.get_freq(fs);
-        self.phase += 1.0/fs * freq; /*+ 50.0 * self.current_primitive as f32*/;
+        if self.phase > 1.0 {
+            self.phase = 0.0;
+        }
 
         let phase = self.phase;
 
@@ -56,11 +62,18 @@ impl Tuning {
             (0.0, -4.1),
         ];
 
-        /*
-        if music.bass_idx == 0 {
-            self.angle = (music.freq_idx / 2) as f32 * 3.8;
-        }
-        */
+        // (freq, dur)
+        const FREQS: [(f32, f32); 8] = [
+            (0.0, 1.2),
+            (40.0, 0.1),
+            (0.0, 1.7),
+            (12.0, 0.2),
+            (0.0, 0.8),
+            (15.0, 0.13),
+            (0.0, 1.3),
+            (14.0, 0.14),
+        ];
+
         self.angle += 1.0/fs * ANGLES[self.angle_idx].1;
 
         let need_change = if ANGLES[self.angle_idx].1 > 0.0 {
@@ -75,12 +88,19 @@ impl Tuning {
                 self.angle_idx = 0;
             }
         }
+        
+        if t - self.freq_switch_time > FREQS[self.freq_idx].1 {
+                self.freq_idx += 1;
+                self.freq_switch_time = t;
+
+                if self.freq_idx >= FREQS.len() {
+                    self.freq_idx = 0;
+                }
+        }
 
         self.circle.rotate = f32::consts::PI * 1.5 + self.angle;
 
-        let kick_line = Line::new(Point{x:0.2, y:0.5}, Point{x:0.8, y:0.5});
-
-        let (x, y) = if music.freq_idx % 4 != 0 || music.bass_idx < 6 {
+        let (x, y) = if FREQS[self.freq_idx].0 == 0.0 {
             let primitives_len = 2;
 
             let primitive_idx = if self.current_primitive < primitives_len {
@@ -89,12 +109,7 @@ impl Tuning {
                 2 * primitives_len - self.current_primitive - 1
             };
 
-            if self.phase > 1.0 {
-                self.phase = 0.0;
-                // log!("sw t: {}, ph: {}, ({}, {})", t, phase, x, y);
-
-                self.switch_time = t;
-
+            if self.phase == 0.0 {
                 self.current_primitive += 1;
                 if self.current_primitive >= 2 * primitives_len {
                     self.current_primitive = 0;
@@ -103,7 +118,7 @@ impl Tuning {
 
             match primitive_idx {
                 0 => {
-                    let (x,y) = self.line.draw((phase * 3.1415926).sin(), fs);
+                    let (x,y) = self.line.draw((phase * f32::consts::PI).sin(), fs);
                     let (x,y) = rotate((x,y), self.angle);
                     let (x,y) = shift((x,y), (0.5, 0.5));
                     
@@ -111,19 +126,18 @@ impl Tuning {
 
                 },
                 1 => {
-                    self.circle.draw((phase * 3.1415926).sin(), fs)
+                    self.circle.draw((phase * f32::consts::PI).sin(), fs)
                 },
                 _ => (0.0, 0.0)
             }
         } else {
-            let (x,_) = kick_line.draw(music.kick_phase.sin() - 0.5, fs);
-            (x * 2.0, (self.angle + x * music.kick_freq * 0.01).sin() * 0.2 + 0.5)
+            (
+                (phase * 2.0 * f32::consts::PI).sin() * 0.5 + 0.5,
+                (phase * (FREQS[self.freq_idx].0 * 2.0 + self.angle * 10.0) * f32::consts::PI).sin() * 0.2 + 0.5
+            )
         };
-         
 
         let (x,y) = (x * 2.0 - 1.0, 1.0 - y * 2.0);
-
-        
 
         return (x, y);
     }
