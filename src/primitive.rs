@@ -25,6 +25,10 @@ pub fn rotate(point: (f32, f32), angle: f32) -> (f32, f32) {
     )
 }
 
+pub fn interp(a: f32, b: f32, p: f32) -> f32 {
+    b - p * (b - a)
+}
+
 #[allow(dead_code)]
 pub struct Rect {
     width: f32,

@@ -49,7 +49,7 @@ impl Tuning {
 
         let phase = self.phase;
 
-        if t > 5.0 {
+        if t > 10.0 {
             if self.p_infade > 0.0 {
                 self.p_infade -= 1.0/fs * 1.0;
             }

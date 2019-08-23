@@ -1,6 +1,7 @@
 use crate::primitive::{Primitive, Point, Line, Ellipse};
 
 use std::f32;
+use crate::music::Music;
 
 pub struct Intro {
     current_primitive: usize,
@@ -25,13 +26,12 @@ impl Intro {
         }
     }
 
-    pub fn draw(&mut self, t: f32, fs: f32) -> (f32, f32) {
-        let freq = 10.0 +
-            if t < 3.0 {t * 2.0}
-            else {
-                if t < 6.0 {t * 300.0 - 900.0}
-                else {1800.0 - 900.0}
-            };
+    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
+        let freq = if t < 3.0 {
+            10.0 + t * 2.0}
+        else {
+            music.get_freq(fs)
+        };
 
         if t > 6.0 {
             if self.p_fade > 0.0 {
