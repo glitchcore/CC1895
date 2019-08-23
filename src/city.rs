@@ -63,6 +63,9 @@ pub struct City {
 
     tower_scale: f32,
     signal_phase: f32,
+
+    top_end: (f32, f32),
+    tower_top: Ellipse,
 }
 
 impl City {
@@ -79,13 +82,13 @@ impl City {
             
             tower_scale: 1.0,
             signal_phase: 1.0,
+
+            top_end: (0.0, 0.0),
+            tower_top: Ellipse::new(Point{x: 0.0, y: 0.0}, 0.0, 0.0),
         }
     }
 
-    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
-        let freq = music.get_freq(fs);
-        // let freq = 1000.0;
-
+    fn draw_tower(&mut self, t: f32, fs: f32) -> (f32, f32) {
         if t > 5.0 {
             if self.tower_scale > 0.0 {
                 self.tower_scale -= 1.0/fs * 0.5;
@@ -100,29 +103,17 @@ impl City {
 
         self.horizon.shift = (0.0, 0.3 * self.p_infade);
 
-        /*
-        if self.p_infade > 0.5 {
-            self.horizon.shift = (0.0, 0.3 - (1.0 - self.tower_scale) * 0.2);
-            self.horizon.scale = (1.0/self.tower_scale, 1.0/self.tower_scale);
-        } else {
-            self.horizon.shift = (0.0, 0.3 - (1.0 - self.tower_scale) * 0.2);
-            self.horizon.scale = (1.0/self.tower_scale, 1.0/self.tower_scale);
-        }
-        */
-
-        // self.tower_signal.scale = (music.kick_freq - 100.0, music.kick_freq/100.0);
-
         const TOP_END: (f32, f32) = (0.2, 0.15);
 
-        let top_end = (
+        self.top_end = (
             interp(0.5 - self.p_infade * TOP_END.0, 0.2, self.tower_scale),
             interp(0.5 + TOP_END.1 * self.p_infade, 0.3, self.tower_scale)
         );
 
-        let tower_top = Ellipse::new(
+        self.tower_top = Ellipse::new(
             Point{
-                x: top_end.0,
-                y: top_end.1
+                x: self.top_end.0,
+                y: self.top_end.1
             },
             (0.3 - self.p_infade * (0.3 - 0.02)) * self.tower_scale,
             (0.3 - self.p_infade * (0.3 - 0.02)) * self.tower_scale
@@ -138,20 +129,77 @@ impl City {
             self.p_infade * 0.5 * self.tower_scale
         );
 
-        let void = Line::new(Point{x:0.0, y:0.0}, Point{x:0.0, y:0.0});
+        let primitives = [
+            &self.tower as &Primitive,
+            &self.tower_top as &Primitive,
+            &self.horizon as &Primitive,
+        ];
 
+        if self.current_primitive >= 2 * primitives.len() {
+            self.current_primitive = 0;
+        }
+
+        let (x, y) = if self.signal_phase < 0.4 {
+            let tower_signal = Ellipse::new(
+                Point{x: self.top_end.0, y: self.top_end.1},
+                self.tower_top.a + self.signal_phase * 1.0,
+                self.tower_top.b + self.signal_phase * 1.0
+            );
+
+            tower_signal.draw(self.phase, fs)
+        } else {
+            primitives[if self.current_primitive < primitives.len() {
+                self.current_primitive
+            } else {
+                2 * primitives.len() - self.current_primitive - 1
+            }]
+                .draw(if self.current_primitive < primitives.len() {self.phase} else {1.0 - self.phase}, fs)
+        };
+
+        (x,y)
+    }
+
+    fn draw_rocket(&mut self, _t: f32, fs: f32) -> (f32, f32) {
         let rocket = Rocket::new();
 
-        let primitives = if t < 8.0 {[
-            &self.tower as &Primitive,
-            &tower_top as &Primitive,
+        let primitives = [
+            &rocket as &Primitive,
             &self.horizon as &Primitive,
-        ]} else {
-            [
-                &void as &Primitive,
-                &rocket as &Primitive,
-                &self.horizon as &Primitive,
-            ]
+        ];
+
+        if self.current_primitive >= 2 * primitives.len() {
+            self.current_primitive = 0;
+        }
+
+        let (x, y) = if self.signal_phase < 0.4 {
+            let tower_signal = Ellipse::new(
+                Point{x: self.top_end.0, y: self.top_end.1},
+                self.tower_top.a + self.signal_phase * 1.0,
+                self.tower_top.b + self.signal_phase * 1.0
+            );
+
+            tower_signal.draw(self.phase, fs)
+        } else {
+            primitives[if self.current_primitive < primitives.len() {
+                self.current_primitive
+            } else {
+                2 * primitives.len() - self.current_primitive - 1
+            }]
+                .draw(if self.current_primitive < primitives.len() {self.phase} else {1.0 - self.phase}, fs)
+        };
+
+        (x, y)
+
+    }
+
+    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
+        let freq = music.get_freq(fs);
+        // let freq = 1000.0;
+
+        let (x,y)  = if t < 8.0 {
+            self.draw_tower(t, fs)
+        } else {
+            self.draw_rocket(t, fs)
         };
 
         if t > 0.8 {
@@ -162,25 +210,6 @@ impl City {
             }
         }
 
-        let phase = self.phase % 1.0;
-
-        let (x, y) = if self.signal_phase < 0.4 {
-            let tower_signal = Ellipse::new(
-                Point{x:top_end.0, y:top_end.1},
-                tower_top.a + self.signal_phase * 1.0,
-                tower_top.b + self.signal_phase * 1.0
-            );
-
-            tower_signal.draw(phase, fs)
-        } else {
-            primitives[if self.current_primitive < primitives.len() {
-                self.current_primitive
-            } else {
-                2 * primitives.len() - self.current_primitive - 1
-            }]
-                .draw(if self.current_primitive < primitives.len() {phase} else {1.0 - phase}, fs)
-        };
-
         let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 
         self.phase += 1.0/fs * freq;
@@ -188,9 +217,6 @@ impl City {
             self.phase = 0.0;
 
             self.current_primitive += 1;
-            if self.current_primitive >= 2 * primitives.len() {
-                self.current_primitive = 0;
-            }
         }
 
         return (x, y);
