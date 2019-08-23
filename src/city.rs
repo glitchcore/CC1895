@@ -66,6 +66,8 @@ pub struct City {
 
     top_end: (f32, f32),
     tower_top: Ellipse,
+
+    rocket_infade: f32,
 }
 
 impl City {
@@ -85,6 +87,8 @@ impl City {
 
             top_end: (0.0, 0.0),
             tower_top: Ellipse::new(Point{x: 0.0, y: 0.0}, 0.0, 0.0),
+
+            rocket_infade: 0.0
         }
     }
 
@@ -160,7 +164,13 @@ impl City {
     }
 
     fn draw_rocket(&mut self, _t: f32, fs: f32) -> (f32, f32) {
-        let rocket = Rocket::new();
+        let mut rocket = Rocket::new();
+
+        if self.rocket_infade < 1.0 {
+            self.rocket_infade += 1.0/fs * 0.5;
+        }
+
+        rocket.scale = (self.rocket_infade, self.rocket_infade);
 
         let primitives = [
             &rocket as &Primitive,
@@ -199,7 +209,7 @@ impl City {
         let (x,y)  = if t < 8.0 {
             self.draw_tower(t, fs)
         } else {
-            self.draw_rocket(t, fs)
+            self.draw_rocket(t - 8.0, fs)
         };
 
         if t > 0.8 {
