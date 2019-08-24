@@ -110,10 +110,11 @@ int main(void)
   while (1)
   {
     HAL_GPIO_WritePin(DEBUG_GPIO_Port, DEBUG_Pin, GPIO_PIN_SET);
-    PointRes sample = request_sample(22000.0);
+    PointRes sample = request_sample(40000.0);
 
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, (uint16_t)((sample.x/2.0 + 0.5) * 4095));
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint16_t)((sample.y/2.0 + 0.5) * 1400));
+
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, (((int16_t)(sample.x * 2048) + 2048)));
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, ((int16_t)(sample.y * 700) + 700));
     HAL_GPIO_WritePin(DEBUG_GPIO_Port, DEBUG_Pin, GPIO_PIN_RESET);
     // HAL_Delay(1);
     // for(size_t i = 0; i < 1; i++) {}
