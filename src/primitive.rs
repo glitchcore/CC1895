@@ -2,6 +2,7 @@ use std::f32;
 
 pub trait Primitive {
     fn draw(&self, t: f32, fs: f32) -> (f32, f32);
+    fn get_size(&self) -> f32;
 }
 
 #[derive(Default)]
@@ -76,6 +77,10 @@ impl Primitive for Rect {
 
         return (point_x, point_y);
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 #[derive(Default)]
@@ -113,6 +118,10 @@ impl Primitive for Line {
 
         return (point_x, point_y);
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 pub struct Ellipse {
@@ -139,6 +148,10 @@ impl Ellipse {
             scale: (1.0, 1.0),
         }
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 impl Primitive for Ellipse {
@@ -155,5 +168,9 @@ impl Primitive for Ellipse {
         let (point_x, point_y) = shift((point_x, point_y), self.shift);
 
         return (point_x, point_y);
+    }
+
+    fn get_size(&self) -> f32 {
+        1.0
     }
 }

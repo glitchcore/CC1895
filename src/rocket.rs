@@ -3,7 +3,7 @@ use crate::primitive::{Primitive, Point, Line, Ellipse, scale, rotate, shift};
 use std::f32;
 
 pub struct Rocket {
-    angle: f32,
+    pub angle: f32,
     pub rotate: f32,
     pub shift: (f32, f32),
     pub scale: (f32, f32)
@@ -53,22 +53,14 @@ impl Primitive for Rocket {
             inner_lines[i] = inner_line;
         }
 
-        self.angle += 1.0/fs * 1.0;
-
         let mut primitives = inner_lines.iter().chain(body_lines.iter());
 
-        let primitives_len = primitives.size_hint().1.unwrap();
+        let phase = t % 1.0;
 
-        let phase = (t * primitives_len as f32) % 1.0;
+        let current_primitive = t as usize;
 
-        let current_primitive = (t * primitives_len as f32) as usize;
-
-        let (x, y) = (primitives.nth(if current_primitive < primitives_len {
-            current_primitive
-        } else {
-            2 * primitives_len - current_primitive - 1
-        }).unwrap() as &Primitive)
-            .draw(if current_primitive < primitives_len {phase} else {1.0 - phase}, fs);
+        let (x, y) = (primitives.nth(current_primitive).unwrap() as &Primitive)
+            .draw(phase, fs);
 
         let (x,y) = shift((x,y), (-0.5, -0.5));
         let (x, y) = scale((x, y), self.scale);
@@ -76,5 +68,9 @@ impl Primitive for Rocket {
         let (x, y) = shift((x, y), (self.shift.0 + 0.5, self.shift.1 + 0.5));
 
         (x, y)
+    }
+
+    fn get_size(&self) -> f32 {
+        (3 + 8) as f32
     }
 }

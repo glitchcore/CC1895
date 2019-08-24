@@ -49,6 +49,10 @@ impl Primitive for Tower {
 
         (x, y)
     }
+
+    fn get_size(&self) -> f32 {
+        self.tower_lines.len() as f32
+    }
 }
 
 pub struct City {
@@ -67,6 +71,8 @@ pub struct City {
     top_end: (f32, f32),
     tower_top: Ellipse,
 
+    rocket: Rocket,
+
     rocket_infade: f32,
 }
 
@@ -80,13 +86,15 @@ impl City {
 
             tower: Tower::new(),
 
-            horizon: Line::new(Point{x:0.0, y:0.3}, Point{x:1.0, y:0.3}),
+            horizon: Line::new(Point{x:0.0, y:0.0}, Point{x:1.0, y:0.0}),
             
             tower_scale: 1.0,
             signal_phase: 1.0,
 
             top_end: (0.0, 0.0),
             tower_top: Ellipse::new(Point{x: 0.0, y: 0.0}, 0.0, 0.0),
+
+            rocket: Rocket::new(),
 
             rocket_infade: 0.0
         }
@@ -105,7 +113,7 @@ impl City {
 
         let _p_fade = 1.0 - self.p_infade;
 
-        self.horizon.shift = (0.0, 0.3 - 0.3 * self.p_infade);
+        self.horizon.shift = (0.0, 0.3 * self.p_infade);
 
         const TOP_END: (f32, f32) = (0.2, 0.15);
 
@@ -160,24 +168,43 @@ impl City {
                 .draw(if self.current_primitive < primitives.len() {self.phase} else {1.0 - self.phase}, fs)
         };
 
+        if self.phase >= 1.0 {
+            self.phase = 0.0;
+
+            self.current_primitive += 1;
+        }
+
         (x,y)
     }
 
-    fn draw_rocket(&mut self, _t: f32, fs: f32) -> (f32, f32) {
-        let mut rocket = Rocket::new();
-
+    fn draw_rocket(&mut self, t: f32, fs: f32) -> (f32, f32) {
         if self.rocket_infade < 1.0 {
             self.rocket_infade += 1.0/fs * 0.5;
         }
 
-        rocket.scale = (self.rocket_infade, self.rocket_infade);
-        rocket.shift = (
-            interp(0.0, 0.1, self.rocket_infade),
-            interp(-0.2, -0.2, self.rocket_infade)
-        );
+        
+
+        self.rocket.angle += 1.0/fs * 0.5;
+
+        if self.horizon.shift.1 > 0.0 {
+            self.horizon.shift.1 -= 1.0/fs * 0.4;
+            self.top_end.1 -= 1.0/fs * 0.4;
+        }
+
+        if t > 3.0 {
+            if self.rocket.shift.1 < 0.0 {
+                self.rocket.shift.1 += 1.0/fs * 0.1;
+            }
+        } else {
+            self.rocket.scale = (self.rocket_infade, self.rocket_infade);
+            self.rocket.shift = (
+                interp(0.0, 0.1, self.rocket_infade),
+                interp(-0.2, -0.2, self.rocket_infade)
+            );
+        }
 
         let primitives = [
-            &rocket as &Primitive,
+            &self.rocket as &Primitive,
             &self.horizon as &Primitive,
         ];
 
@@ -185,35 +212,53 @@ impl City {
             self.current_primitive = 0;
         }
 
-        let (x, y) = if self.signal_phase < 0.4 {
+        let (x, y, phase_size) = if self.signal_phase < 0.2 && t < 3.0 {
             let tower_signal = Ellipse::new(
                 Point{x: self.top_end.0, y: self.top_end.1},
                 self.tower_top.a + self.signal_phase * 1.0,
                 self.tower_top.b + self.signal_phase * 1.0
             );
 
-            tower_signal.draw(self.phase, fs)
+            let (x,y) = tower_signal.draw(self.phase, fs);
+
+            (x, y, 1.0)
         } else {
-            primitives[if self.current_primitive < primitives.len() {
+            let primitive = primitives[if self.current_primitive < primitives.len() {
                 self.current_primitive
             } else {
                 2 * primitives.len() - self.current_primitive - 1
-            }]
-                .draw(if self.current_primitive < primitives.len() {self.phase} else {1.0 - self.phase}, fs)
+            }];
+
+            let (x,y) = primitive.draw(
+                if self.current_primitive < primitives.len() {
+                    self.phase
+                } else {
+                    1.0 - self.phase
+                },
+                fs
+            );
+
+            (x,y,primitive.get_size())
         };
+
+        if self.phase >= phase_size {
+            self.phase = 0.0;
+
+            self.current_primitive += 1;
+        }
 
         (x, y)
 
     }
 
     pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
-        let freq = music.get_freq(fs);
+        let freq = 500.0; // music.get_freq(fs);
         // let freq = 1000.0;
 
-        let (x,y)  = if t < 0.0 {
+        let (x,y)  = if t < 8.0 {
             self.draw_tower(t, fs)
         } else {
-            self.draw_rocket(t - 0.0, fs)
+            self.draw_rocket(t - 8.0, fs)
         };
 
         if t > 0.8 {
@@ -227,11 +272,6 @@ impl City {
         let (x,y) = (x * 2.0 - 1.0, y * 2.0 - 1.0);
 
         self.phase += 1.0/fs * freq;
-        if self.phase >= 1.0 {
-            self.phase = 0.0;
-
-            self.current_primitive += 1;
-        }
 
         return (x, y);
     }

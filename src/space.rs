@@ -1,4 +1,4 @@
-use crate::primitive::{Primitive, Point, Line, Ellipse};
+use crate::primitive::{Primitive, Point, Line, Ellipse, scale};
 
 use std::f32;
 use crate::music::Music;
@@ -7,6 +7,8 @@ pub struct Space {
     current_primitive: usize,
     phase: f32,
     angle: f32,
+
+    p_infade: f32,
 }
 
 
@@ -21,10 +23,11 @@ impl Space {
             current_primitive: 0,
             phase: 0.0,
             angle: 0.0,
+            p_infade: 0.5
         }
     }
 
-    pub fn draw(&mut self, music: &mut Music, _t: f32, fs: f32) -> (f32, f32) {
+    pub fn draw(&mut self, music: &mut Music, t: f32, fs: f32) -> (f32, f32) {
 
         let body = Ellipse::new(Point{x:0.7, y:0.7}, 0.15, 0.15);
 
@@ -79,6 +82,16 @@ impl Space {
         }
 
         self.angle += 0.00001;
+
+        if self.p_infade < 1.0 {
+            self.p_infade += 1.0/fs * 0.3;
+        }
+
+        if t > 5.0 {
+            self.p_infade += 1.0/fs * 5.0;
+        }
+
+        let (x,y) = scale((x,y), (0.1 + self.p_infade * 0.7, 0.1 + self.p_infade * 0.7));
 
         return (x, y);
     }

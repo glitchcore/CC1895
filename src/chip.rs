@@ -18,42 +18,42 @@ impl Chip {
     }
 }
 
+const WIDTH: f32 = 0.5;
+const HEIGHT: f32 = 0.5;
+const CENTER_X: f32 = 0.5;
+const CENTER_Y: f32 = 0.5;
+
+const PIN_COUNT: usize = 8;
+const PADDING: f32 = 0.05;
+const PIN_LENGTH: f32 = 0.08;
+
+const BODY: [Line;4] = [
+    Line::new(
+        Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0},
+        Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0}
+    ),
+    Line::new(
+        Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0},
+        Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0}
+    ),
+    Line::new(
+        Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0},
+        Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0}
+    ),
+    Line::new(
+        Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0},
+        Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0}
+    ),
+];
+
+const SPACING_X: f32 = (WIDTH - PADDING) / PIN_COUNT as f32;
+const SPACING_Y: f32 = (HEIGHT - PADDING) / PIN_COUNT as f32;
+
 impl Primitive for Chip {
     fn draw(&self, t: f32, fs: f32) -> (f32, f32) {
     	// let fs = fs * 100.0;
-        const WIDTH: f32 = 0.5;
-        const HEIGHT: f32 = 0.5;
-        const CENTER_X: f32 = 0.5;
-        const CENTER_Y: f32 = 0.5;
-
-        const PIN_COUNT: usize = 8;
-        const PADDING: f32 = 0.05;
-        const PIN_LENGTH: f32 = 0.08;
-
-
-    	const BODY: [Line;4] = [
-    		Line::new(
-    			Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0},
-    			Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0}
-    		),
-    		Line::new(
-    			Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0},
-    			Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0}
-    		),
-    		Line::new(
-    			Point{x:CENTER_X + WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0},
-    			Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0}
-    		),
-    		Line::new(
-    			Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y - HEIGHT/2.0},
-    			Point{x:CENTER_X - WIDTH/2.0, y:CENTER_Y + HEIGHT/2.0}
-    		),
-    	];
 
         let mut pins: [Line; PIN_COUNT * 4] = Default::default();
-
-        const SPACING_X: f32 = (WIDTH - PADDING) / PIN_COUNT as f32;
-        const SPACING_Y: f32 = (HEIGHT - PADDING) / PIN_COUNT as f32;
 
         // top
         for i in 0..PIN_COUNT {
@@ -132,5 +132,9 @@ impl Primitive for Chip {
         let (x, y) = shift((x, y), (self.shift.0 + 0.5, self.shift.1 + 0.5));
 
         return (x, y);
+    }
+
+    fn get_size(&self) -> f32 {
+        (BODY.len() + PIN_COUNT * 4) as f32
     }
 }
