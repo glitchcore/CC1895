@@ -33,6 +33,8 @@ mod music;
 mod city;
 mod space;
 mod rocket;
+mod chip;
+mod chip_world;
 
 struct Ctx {
     intro: intro::Intro,
@@ -40,40 +42,20 @@ struct Ctx {
     music: music::Music,
     city: city::City,
     space: space::Space,
-    rocket: rocket::Rocket,
+    chip_world: chip_world::ChipWorld,
     t: f32,
 }
 
-fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {
-    /*
-    if t < 60.0 {
-        if t < 7.0 {
-            ctx.intro.draw(t, fs)
-        } else {
-            ctx.tuning.draw(&mut ctx.music, t - 7.0, fs)
-        }
-    } else {
-        ctx.city.draw(&mut ctx.music, t, fs)
-    }
-    */
+fn process_sample(ctx: &mut Ctx, t: f32, fs: f32) -> (f32, f32) {    
+    match (t * 1000.0) as i32 {
+        0...7000 => ctx.intro.draw(&mut ctx.music, t, fs),
+        7000...14000 => ctx.tuning.draw(&mut ctx.music, t - 7.0, fs),
+        14000...30000 => ctx.city.draw(&mut ctx.music, t - 14.0, fs),
+        30000...38000 => ctx.space.draw(&mut ctx.music, t - 30.0, fs),
+        38000...48000 => ctx.chip_world.draw(&mut ctx.music, t - 38.0, fs),
 
-    ctx.space.draw(&mut ctx.music, t, fs)
-
-    /*
-    if false {
-        
+        _ => (0.0, 0.0)
     }
-
-    if false {
-        ctx.space.draw(&mut ctx.music, t, fs);
-    }
-
-    if true {
-        ctx.rocket.draw(&mut ctx.music, t, fs)
-    } else {
-        (0.0, 0.0)
-    }
-    */
 }
 
 static mut CTX: Ctx = Ctx {
@@ -82,8 +64,8 @@ static mut CTX: Ctx = Ctx {
     music: music::Music::new(),
     city: city::City::new(),
     space: space::Space::new(),
-    rocket: rocket::Rocket::new(),
     t: 0.0,
+    chip_world: chip_world::ChipWorld::new(),
 };
 
 /*

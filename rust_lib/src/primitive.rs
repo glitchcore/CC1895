@@ -3,6 +3,7 @@ use crate::math::Math;
 
 pub trait Primitive {
     fn draw(&self, t: f32, fs: f32) -> (f32, f32);
+    fn get_size(&self) -> f32;
 }
 
 #[derive(Default)]
@@ -26,14 +27,18 @@ pub fn rotate(point: (f32, f32), angle: f32) -> (f32, f32) {
     )
 }
 
+pub fn interp(a: f32, b: f32, p: f32) -> f32 {
+    b - p * (b - a)
+}
+
 #[allow(dead_code)]
 pub struct Rect {
     width: f32,
     height: f32,
 
-    rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub rotate: f32,
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 #[allow(dead_code)]
@@ -73,6 +78,10 @@ impl Primitive for Rect {
 
         return (point_x, point_y);
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 #[derive(Default)]
@@ -81,8 +90,8 @@ pub struct Line {
     end: Point,
 
     pub rotate: f32,
-    shift: (f32, f32),
-    scale: (f32, f32)
+    pub shift: (f32, f32),
+    pub scale: (f32, f32)
 }
 
 impl Line {
@@ -110,11 +119,15 @@ impl Primitive for Line {
 
         return (point_x, point_y);
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 pub struct Ellipse {
-    a: f32,
-    b: f32,
+    pub a: f32,
+    pub b: f32,
 
     pub begin: f32,
     pub end: f32,
@@ -136,6 +149,10 @@ impl Ellipse {
             scale: (1.0, 1.0),
         }
     }
+
+    fn get_size(&self) -> f32 {
+        1.0
+    }
 }
 
 impl Primitive for Ellipse {
@@ -152,5 +169,9 @@ impl Primitive for Ellipse {
         let (point_x, point_y) = shift((point_x, point_y), self.shift);
 
         return (point_x, point_y);
+    }
+
+    fn get_size(&self) -> f32 {
+        1.0
     }
 }
